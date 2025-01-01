@@ -1,0 +1,119 @@
+version: '3.7'
+
+networks:
+   cdc-network:
+       name: cdc-network
+       driver: bridge
+       external: false
+
+services:
+   cdc-postgres:
+       image: debezium/postgres:11
+       container_name: cdc-postgres
+       hostname: cdc-postgres
+       restart: always
+       ports:
+           - '5432:5432'
+       environment:
+           POSTGRES_PASSWORD: 123
+           POSTGRES_USER: postgres
+           POSTGRES_DB: cdc-debezium
+       volumes:
+           - 'cdc-postgres-data:/var/lib/postgresql/data'
+       networks:
+           - cdc-network
+
+   cdc-zookeeper:
+       image: confluentinc/cp-zookeeper:7.3.0
+       container_name: cdc-zookeeper
+       hostname: cdc-zookeeper
+       restart: always
+       environment:
+           ZOOKEEPER_CLIENT_PORT: 2181
+           ZOOKEEPER_TICK_TIME: 2000
+       ports:
+           - "2181:2181"
+       networks:
+           - cdc-network
+
+   cdc-kafka:
+       image: confluentinc/cp-kafka:7.3.0
+       container_name: cdc-kafka
+       hostname: cdc-kafka
+       restart: always
+       depends_on:
+           - cdc-zookeeper
+       environment:
+           KAFKA_BROKER_ID: 1
+           KAFKA_ZOOKEEPER_CONNECT: 'cdc-zookeeper:2181'
+           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cdc-kafka:9092
+           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+       ports:
+           - "9092:9092"
+       networks:
+           - cdc-network
+
+   cdc-debezium-connect:
+       image: debezium/connect:2.3
+       container_name: cdc-debezium-connect
+       hostname: cdc-debezium-connect
+       restart: always
+       ports:
+           - '8083:8083'
+       environment:
+           BOOTSTRAP_SERVERS: cdc-kafka:9092
+           GROUP_ID: 1
+           CONFIG_STORAGE_TOPIC: my_connect_configs
+           OFFSET_STORAGE_TOPIC: my_connect_offsets
+           STATUS_STORAGE_TOPIC: my_connect_statuses
+           ENABLE_DEBEZIUM_SCRIPTING: 'true'
+       depends_on:
+           - cdc-kafka
+           - cdc-postgres
+       networks:
+           - cdc-network
+
+   cdc-nifi:
+       image: apache/nifi:1.23.2
+       container_name: cdc-nifi
+       hostname: nifi-node
+       restart: always
+       ports:
+           - "8080:8080"
+       environment:
+           NIFI_WEB_HTTP_PORT: '8080'
+       depends_on:
+           - cdc-kafka
+       networks:
+           - cdc-network
+       volumes:
+           - 'cdc-nifi1-data:/opt/nifi/nifi-current/conf'
+
+   cdc-dwh:
+       image: postgres:14
+       container_name: cdc-dwh
+       hostname: cdc-dwh
+       restart: always
+       environment:
+           POSTGRES_USER: postgres
+           POSTGRES_PASSWORD: postgres
+           POSTGRES_DB: cdc-dwh
+       ports:
+           - "5433:5432"
+       volumes:
+           - cdc-dwh-data:/var/lib/postgresql/data
+       networks:
+           - cdc-network
+
+
+volumes:
+   cdc-postgres-data:
+       name: cdc-postgres-data
+       driver: local
+   cdc-dwh-data:
+       name: cdc-dwh-data
+       driver: local
+   cdc-nifi1-data:
+       name: cdc-nifi1-data
+       driver: local
+
