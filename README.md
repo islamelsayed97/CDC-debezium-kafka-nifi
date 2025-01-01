@@ -61,7 +61,7 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
 1. run the docke compose file
    ```
    cd CDC-debezium-kafka-nifi
-   docker compose up`
+   docker compose up -d
 2. run the following command on you host machine to create a connector on debezium to monitor transctions table in postgres
    ```
    curl --location 'http://localhost:8083/connectors' \
