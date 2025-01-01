@@ -6,6 +6,9 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
 
 ## Project Overview
 
+![image](https://github.com/user-attachments/assets/56cd432b-058a-4528-b943-e5fbea100b7c)
+
+
 1. **Source Database (Postgres):**  
    - A Postgres database serves as the primary data source, containing a transactions table where changes (inserts, updates, deletes) occur.
 
