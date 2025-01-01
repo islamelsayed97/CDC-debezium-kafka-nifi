@@ -58,7 +58,10 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
 
 ## How It Works
 
-1. run the docke compose file ```cd CDC-debezium-kafka-nifi & docker compose up```
+1. run the docke compose file
+   ```
+   cd CDC-debezium-kafka-nifi
+   docker compose up`
 2. run the following command on you host machine to create a connector on debezium to monitor transctions table in postgres
    ```
    curl --location 'http://localhost:8083/connectors' \
@@ -76,12 +79,14 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
        "database.server.id": "184054",
        "table.include.list": "public.transactions",
        "topic.prefix": "cdc-topic"
-   }
-}'```  
+     }
+   }'  
 the kafka topic for these events is `cdc-topic.public.transactions`
-3. to enable updates monitoring as well, execute the following command on postgres database on postgres container 
-   `ALTER TABLE transactions
-    REPLICA IDENTITY FULL;`
+3. to enable updates monitoring as well, execute the following command on postgres database on postgres container
+   ```
+   ALTER TABLE transactions
+   REPLICA IDENTITY FULL;
+   ```
 4. open this url localhost:8080 in you browser to access nifi UI and upload `cdc-debezium.xml` template which I previouslly created for consuming events from kafka, processing it and send it elasticsearch and bigquery 
 5. start inserting new records transactions table or update existing ones. these actions will be recorded in the Postgres WAL which is monitored by debezium.  
 6. Debezium captures the WAL entries and publishes them to a Kafka topic as change events.  
