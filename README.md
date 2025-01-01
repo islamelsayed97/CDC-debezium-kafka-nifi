@@ -1,6 +1,6 @@
 # Real-Time Change Data Capture (CDC) Pipeline
 
-This project demonstrates the implementation of a real-time CDC pipeline using **Postgres**, **Debezium**, **Kafka**, **NiFi**, and **Elasticsearch**. The primary goal is to efficiently capture and propagate changes made to a transactions table in a Postgres database to other systems for updates tracking and data synchronization.
+This project demonstrates the implementation of a real-time CDC pipeline using **Postgres**, **Debezium**, **Kafka**, **NiFi**, **Elasticsearch**, and **Kibana**. The primary goal is to efficiently capture and propagate changes made to a transactions table in a Postgres database to other systems for updates tracking, data synchronization, and visualization.
 
 ---
 
@@ -25,12 +25,12 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
    - The data is parsed, and relevant update details.  
    - NiFi workflows transform and route the data to the appropriate destinations.
 
-5. **Elasticsearch:**  
-   - The transformed data is indexed in Elasticsearch for real-time updates tracking and querying capabilities.  
-   - This enables efficient visualization and historical analysis of changes in the transactions data.
+5. **Elasticsearch and Kibana:**  
+   - The transformed data is indexed in Elasticsearch for real-time updates tracking.  
+   - Kibana is used to visualize and query the Elasticsearch data, enabling efficient analysis of changes in the transactions table.
 
-6. **Secondary Database:**  
-   - The processed updates are also written to another database, ensuring data consistency and enabling downstream applications to access the synchronized data. 
+6. **BigQuery:**  
+   - The processed updates are also written to BigQuery, providing a robust data warehouse solution for advanced analytics which is updated in real time.
 
 ---
 
@@ -39,8 +39,8 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
 - **Real-Time Data Streaming:** Capture and propagate data changes with low latency.  
 - **Scalable Architecture:** Leverages Kafka for high throughput and reliability.  
 - **Data Transformation:** Processes and enriches change events in NiFi before routing them to target systems.  
-- **Updates Tracking:** Stores change logs in Elasticsearch, enabling queryable and auditable records of all updates.  
-- **Multi-Destination Integration:** Supports synchronization to multiple systems, ensuring consistent and up-to-date data across the ecosystem.
+- **Updates Tracking:** Stores change logs in Elasticsearch and visualizes them using Kibana for real-time insights.  
+- **Advanced Analytics:** Integrates with BigQuery for large-scale data warehousing and analytical capabilities.  
 
 ---
 
@@ -50,18 +50,45 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
 - **Debezium:** Change Data Capture tool for Postgres.  
 - **Kafka:** Message broker for event-driven data transfer.  
 - **NiFi:** Data flow automation and processing platform.  
-- **Elasticsearch:** Distributed search and analytics engine.
+- **Elasticsearch:** Distributed search and analytics engine.  
+- **Kibana:** Visualization and querying tool for Elasticsearch.  
+- **BigQuery:** Cloud-based data warehouse for analytics.
 
 ---
 
 ## How It Works
 
-1. Changes in the transactions table are recorded in the Postgres WAL.  
-2. Debezium captures the WAL entries and publishes them to a Kafka topic as change events.  
-3. NiFi consumes the events, processes them, and extracts meaningful update details.  
-4. The processed data is routed to:  
-   - A secondary database for data synchronization.  
-   - Elasticsearch for tracking and querying changes.
+1. run the docke compose file ```cd CDC-debezium-kafka-nifi & docker compose up```
+2. run the following command on you host machine to create a connector on debezium to monitor transctions table in postgres
+   ```
+   curl --location 'http://localhost:8083/connectors' \
+   --header 'Accept: application/json' \
+   --header 'Content-Type: application/json' \
+   --data '{
+   "name": "cdc-using-debezium-connector",
+   "config": {
+       "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+       "database.hostname": "cdc-postgres",
+       "database.port": "5432",
+       "database.user": "postgres",
+       "database.password": "postgres",
+       "database.dbname": "cdc-debezium",
+       "database.server.id": "184054",
+       "table.include.list": "public.transactions",
+       "topic.prefix": "cdc-topic"
+   }
+}'```  
+the kafka topic for these events is `cdc-topic.public.transactions`
+3. to enable updates monitoring as well, execute the following command on postgres database on postgres container 
+   `ALTER TABLE transactions
+    REPLICA IDENTITY FULL;`
+4. open this url localhost:8080 in you browser to access nifi UI and upload `cdc-debezium.xml` template which I previouslly created for consuming events from kafka, processing it and send it elasticsearch and bigquery 
+5. start inserting new records transactions table or update existing ones. these actions will be recorded in the Postgres WAL which is monitored by debezium.  
+6. Debezium captures the WAL entries and publishes them to a Kafka topic as change events.  
+7. NiFi consumes the events, processes them, and extracts meaningful update details.  
+8. The processed data is routed to:  
+   - BigQuery for advanced analytics and storage.  
+   - Elasticsearch for real-time updates tracking, with visualization provided by Kibana.
 
 ---
 
