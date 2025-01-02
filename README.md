@@ -77,12 +77,14 @@ This project demonstrates the implementation of a real-time CDC pipeline using *
        "database.password": "postgres",
        "database.dbname": "cdc-debezium",
        "database.server.id": "184054",
+       "decimal.handling.mode": "string",
        "table.include.list": "public.transactions",
        "topic.prefix": "cdc-topic"
      }
    }'  
 the kafka topic for these events is `cdc-topic.public.transactions`
-3. to enable updates monitoring as well, execute the following command on postgres database on postgres container
+3. run the following python script to create transactions table in postgres database, generate a fake transaction and insert it into the transactions `python3 script.py`
+3. to enable full monitoring as well, execute the following command on postgres database on postgres container
    ```
    ALTER TABLE transactions
    REPLICA IDENTITY FULL;
