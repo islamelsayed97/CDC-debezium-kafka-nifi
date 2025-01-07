@@ -1,0 +1,68 @@
+[
+  {
+    "name": "transaction_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "user_id",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "timestamp",
+    "type": "INT64",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "amount",
+    "type": "FLOAT",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "currency",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "city",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "country",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "merchant_name",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "payment_method",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "ip_address",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "voucher_code",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "last_modified_time",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "type",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  }
+]
+

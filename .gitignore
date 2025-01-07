@@ -1,0 +1,12 @@
+# Ignore the service account key file
+terraform/terraform-sa-key.json
+
+# Terraform state files
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# Directory for local Terraform provider plugins
+terraform/.terraform/
+
+# Terraform lock file (optional: add this if you prefer not to track provider versions)
+terraform/.terraform.lock.hcl
